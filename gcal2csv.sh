@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# Cat out the file and remove the headers
+
+
 NEW_FILE="${1}.tmp.ics"
 OUT_FILE="${2}"
 
@@ -15,7 +16,7 @@ DELIMITER=";"
 DESCRIPTION_FLAG=false
 SUMMARY_FLAG=false
 
-HEADER="DTSTART${DELIMITER}DTEND${DELIMITER}CREATED${DELIMITER}DESCRIPTION${DELIMITER}LAST_MODIFIED${DELIMITER}LOCATION${DELIMITER}SUMMARY"
+HEADER="DTSTART${DELIMITER}DTEND${DELIMITER}DTSTAMP${DELIMITER}UID${DELIMITER}CREATED${DELIMITER}DESCRIPTION${DELIMITER}LAST_MODIFIED${DELIMITER}LOCATION${DELIMITER}SEQUENCE${DELIMITER}SUMMARY${DELIMITER}TRANSP"
 
 echo "$HEADER" > $OUT_FILE
 
@@ -33,6 +34,16 @@ for line in $CONTENT ; do
   if [[ "$nline" == DTEND* ]] ; then
     DTEND=`echo $line | sed -e 's/^.*://'`
     CSVLINE="${CSVLINE}${DELIMITER}${DTEND}"
+  fi 
+
+  if [[ "$nline" == DTSTAMP* ]] ; then
+    DTSTAMP=`echo $line | sed -e 's/^.*://'`
+    CSVLINE="${CSVLINE}${DELIMITER}${DTSTAMP}"
+  fi 
+
+  if [[ "$nline" == UID* ]] ; then
+    GUID=`echo $line | sed -e 's/^.*://'`
+    CSVLINE="${CSVLINE}${DELIMITER}${GUID}"
   fi 
   
   if [[ "$nline" == CREATED* ]] ; then
@@ -62,6 +73,11 @@ for line in $CONTENT ; do
     LOCATION=`echo $line | sed -e 's/^.*://'`
     CSVLINE="${CSVLINE}${DELIMITER}${LOCATION}"
   fi
+
+  if [[ "$nline" == SEQUENCE* ]] ; then
+    SEQUENCE=`echo $line | sed -e 's/^.*://'`
+    CSVLINE="${CSVLINE}${DELIMITER}${SEQUENCE}"
+  fi
  
   if [ $SUMMARY_FLAG == true ] ; then
     if [[ "$nline" == TRANSP* ]] ; then
@@ -73,6 +89,11 @@ for line in $CONTENT ; do
     SUMMARY_FLAG=true
     SUMMARY=`echo $line | sed -e 's/^.*://'`
     CSVLINE="${CSVLINE}${DELIMITER}${SUMMARY}"
+  fi
+
+  if [[ "$nline" == TRANSP* ]] ; then
+    TRANSP=`echo $line | sed -e 's/^.*://'`
+    CSVLINE="${CSVLINE}${DELIMITER}${TRANSP}"
   fi
 
   if [ "$nline" == "END:VEVENT" ] ; then
